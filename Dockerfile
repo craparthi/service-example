@@ -1,15 +1,14 @@
-# Step 1: Build the app in image 'builder'
-FROM node:14-alpine AS builder
+FROM node:lts
 
+# Install global npm packages
+RUN npm i -g @angular/cli
+
+# Set working directory
 WORKDIR /usr/src/app
+
+# Copy and install local npm packages
+COPY package.json* package-lock.json* ./
+RUN npm install
+
+# Copy the remaining source code
 COPY . .
-RUN yarn && yarn build
-
-# Step 2: Use build output from 'builder'
-FROM nginx:stable-alpine
-LABEL version="1.0"
-
-COPY nginx.conf /etc/nginx/nginx.conf
-
-WORKDIR /usr/share/nginx/html
-COPY --from=builder /usr/src/app/dist/service-example/ .
